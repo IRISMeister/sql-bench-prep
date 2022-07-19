@@ -124,7 +124,7 @@ TUNE TABLE MySchema.MyTable
 
 更新: 2020年11月20日   使用方法を、SQL文の修正が不要な方法に変更しました
 
-> IRISバージョン2022.1以降、SQLのTimeStamp型の既定値が%PosixTimeに変更されました。これ変更によりテーブルを新規作成した際のTimeStamp型は%PosixTimeになります。
+> IRISバージョン2022.1以降、SQLのTimeStamp型の既定値が%PosixTimeに変更されました。この変更によりテーブルを新規作成した際のTimeStamp型は%PosixTimeになります。
 
 ```
 create table TEST (ts TIMESTAMP)
