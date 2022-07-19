@@ -61,7 +61,7 @@ Allocated 750MB shared memory using Huge Pages: 512MB global buffers, 64MB routi
 
 特にクラウド上でのベンチマークの場合、ストレージのレイアウトがパフォーマンスに大きな影響を与えます。クラウドではストレージごとのIOPSが厳格に制御されているためです。
 
-[こちら](https://docs.intersystems.com/iris20201/csp/docbookj/Doc.View.cls?KEY=GCI_prepare_install#GCI_filesystem)に細かな推奨事項が掲載されていますが、まずは下記のように、アクセス特性の異なる要素を、それぞれ別のストレージに配置することをお勧めします。
+[こちら](https://docs.intersystems.com/irislatestj/csp/docbook/DocBook.UI.Page.cls?KEY=GCI_prepare_install#GCI_filesystem)に細かな推奨事項が掲載されていますが、まずは下記のように、アクセス特性の異なる要素を、それぞれ別のストレージに配置することをお勧めします。
 
 ```
 Filesystem      Size  Used Avail Use% Mounted on
@@ -73,6 +73,10 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 サイズは用途次第です。WIJに割り当てているサイズが大きめなのは、IOPS性能がファイルシステムの容量に比例するクラウドを使用するケースを意識したためで、IOPSとサイズが連動しないオンプレミス環境では、これほどのサイズは必要ありません。
 
+## データベースファイルのサイズ
+
+IRISのデータベースファイルの初期値は1MBです。既定では、ディスク容量が許容する限り自動拡張を行いますので、エラーにはなりませんが、パフォーマンスは劣化します。ベンチマークプログラムでそのことに気づくことはありません。お勧めは、一度ベンチマークを実行して、必要な容量まで自動拡張を行い、データを削除(DROP TABLEやTRUNCATE TABLEを実行)した後に、再度ベンチマークを実行することです。
+
 ## テーブルへのインデックス追加 
 
 IRISのテーブルへのインデックス追加は一部のDWH製品のように自動ではありません。多くのRDBMS製品と同様に、CREATE TABLE命令の実行時に、プライマリキー制約やユニーク制約が指定されている場合、インデックが追加されますが、それ以外のインデックスはCREATE INDEX命令で明示的に追加する必要があります。
@@ -80,7 +84,7 @@ IRISのテーブルへのインデックス追加は一部のDWH製品のよう�
 どのようなインデックスが有用なのかは、実行するクエリに依存します。
 一般的に、ジョインの結合条件(ON句)となるフィールド、クエリやUPDATE文の選択条件(WHERE句)となるフィールド、グルーピングされる(GROUP BY)フィールドが対象となります。
 
-[インデックスの対象](https://docs.intersystems.com/iris20221/csp/docbookj/DocBook.UI.Page.cls?KEY=GSQLOPT_optquery#GSQLOPT_optquery_indexfields)を参照ください。
+[インデックスの対象](https://docs.intersystems.com/irislatestj/csp/docbook/DocBook.UI.Page.cls?KEY=GSQLOPT_optquery#GSQLOPT_optquery_indexfields)を参照ください。
 
 ## 統計情報の取得 
 
@@ -99,7 +103,7 @@ TuneTable(テーブル対象)/TuneSchema(スキーマ対象)を実行すると�
 
 > もちろん、これらの性能を計測したい場合は、その限りではありません。
 
-TuneTable/TuneSchemaは、管理ポータル及びCLIで、手動で[実行可能](http://docs.intersystems.com/irislatestj/csp/docbookj/Doc.View.cls?KEY=GSQLOPT_opttable#GSQLOPT_opttable_tunetable_run)です。ベンチマーク測定時は、データの再投入やインデックスの追加や削除といった、統計情報の更新を繰り返し実行する必要性が高くなることを考慮すると、手動での更新は避けて、下記のObjectScriptのCLIやSQL文で実施するのが効果的です。
+TuneTable/TuneSchemaは、管理ポータル及びCLIで、手動で[実行可能](http://docs.intersystems.com/irislatestj/csp/docbook/Doc.View.cls?KEY=GSQLOPT_opttable#GSQLOPT_opttable_tunetable_run)です。ベンチマーク測定時は、データの再投入やインデックスの追加や削除といった、統計情報の更新を繰り返し実行する必要性が高くなることを考慮すると、手動での更新は避けて、下記のObjectScriptのCLIやSQL文で実施するのが効果的です。
 
 下記コマンドはスキーマMySchemaで始まる全てのテーブルの統計情報を取得します。
 ```
@@ -176,7 +180,7 @@ TIMESTAMP=%Library.PosixTime  (修正後)
 CREATE TABLE TestTable (ts TIMESTAMP, binaryA VARBINARY(512), binaryB VARBINARY(256))
 ```
 
-VARBINARY使用時には、行全体のサイズに注意が必要です。SQLの行は、IRIS内部では、既定では下記のフォーマットで、1つのノードのデータ部(IRISの内部形式の用語でKV形式のバリューに相当します)に格納されます。このノードの[サイズ上限]((https://docs.intersystems.com/iris20221/csp/docbookj/DocBook.UI.Page.cls?KEY=GCOS_types#GCOS_types_strings_long))は3,641,144バイトです。
+VARBINARY使用時には、行全体のサイズに注意が必要です。SQLの行は、IRIS内部では、既定では下記のフォーマットで、1つのノードのデータ部(IRISの内部形式の用語でKV形式のバリューに相当します)に格納されます。このノードの[サイズ上限]((https://docs.intersystems.com/irislatestj/csp/docbook/DocBook.UI.Page.cls?KEY=GCOS_types#GCOS_types_strings_long))は3,641,144バイトです。
 
 長さ|データタイプ|データ|長さ|データタイプ|データ|...
 
@@ -200,4 +204,4 @@ SaveMAC=1   <== 既定値は0です
 また、これとは逆にジャーナルは、随時蓄積していきますので、ベンチマーク実施を繰り返すうちに、いずれはディスクの空き容量を圧迫します。
 適宜ジャーナルファイルを削除してください。運用環境では絶対禁止の方法ですが、データベースミラーリングを使用しておらず、データの保全が必要のないベンチマーク環境でしたら、最新のジャーナルファイル以外をO/Sシェルでrmしてしまって構いません。
 
-これ以後の、[細かな確認作業](https://docs.intersystems.com/irislatestj/csp/docbookj/Doc.View.cls?KEY=GSQLOPT)はさておき、まずは上記の項目の実施をスタートラインとすることをお勧めします。
+これ以後の、[細かな確認作業](https://docs.intersystems.com/irislatestj/csp/docbook/DocBook.UI.Page.cls?KEY=GSQLOPT_intro)はさておき、まずは上記の項目の実施をスタートラインとすることをお勧めします。
